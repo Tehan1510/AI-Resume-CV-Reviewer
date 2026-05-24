@@ -1,4 +1,4 @@
-# AI CV Reviewer
+# AI Resume/CV Reviewer
 
 AI-powered CV/Resume reviewer built with Streamlit + Claude API.
 
