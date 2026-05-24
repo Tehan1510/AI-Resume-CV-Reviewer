@@ -1,4 +1,4 @@
-# 📄 AI CV Reviewer
+# 📄 AI Resume/CV Reviewer
 
 An AI-powered CV/Resume reviewer built with Streamlit and Groq (free AI API).  
 Upload your CV and get an instant score, feedback, ATS keywords, and improved bullet points.
