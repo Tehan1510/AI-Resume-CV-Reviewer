@@ -2,9 +2,12 @@ from groq import Groq
 import json
 import re
 import os
+import streamlit as st
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+api_key = os.getenv("GROQ_API_KEY") or st.secrets.get("GROQ_API_KEY")
+client = Groq(api_key=api_key)
 MODEL = "llama-3.3-70b-versatile"
+
 
 def _ask(prompt: str, max_tokens: int = 1500) -> str:
     msg = client.chat.completions.create(
