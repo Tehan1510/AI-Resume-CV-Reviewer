@@ -27,7 +27,7 @@ with st.sidebar:
         help="Used to generate ATS keyword suggestions tailored to the role.",
     )
     st.markdown("---")
-    st.info("Your CV text is only sent to the Anthropic API and is not stored.")
+    st.info("Your CV text is only sent to the Groq API and is not stored.")
 
 # ── File upload ───────────────────────────────────────────────
 uploaded_file = st.file_uploader(
@@ -38,9 +38,9 @@ uploaded_file = st.file_uploader(
 
 if uploaded_file and st.button("🔍 Analyse My CV", type="primary"):
     
-    if not os.getenv("ANTHROPIC_API_KEY"):
-        st.error("ANTHROPIC_API_KEY not found. Add it to your .env file.")
-        st.stop()
+    if not os.getenv("GROQ_API_KEY"):
+    st.error("GROQ_API_KEY not found. Add it to your .env file.")
+    st.stop()
 
     # ── Extract text ──────────────────────────────────────────
     with st.spinner("Reading your CV..."):

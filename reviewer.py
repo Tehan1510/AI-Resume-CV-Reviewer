@@ -1,85 +1,55 @@
-import anthropic
+from groq import Groq
 import json
 import re
+import os
 
-client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from env automatically
-MODEL = "claude-sonnet-4-20250514"
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+MODEL = "llama3-70b-8192"
 
 
-def _ask_claude(prompt: str, max_tokens: int = 1500) -> str:
-    message = client.messages.create(
+def _ask(prompt: str, max_tokens: int = 1500) -> str:
+    msg = client.chat.completions.create(
         model=MODEL,
         max_tokens=max_tokens,
         messages=[{"role": "user", "content": prompt}],
     )
-    return message.content[0].text.strip()
+    return msg.choices[0].message.content.strip()
+
+
+def _parse(raw: str):
+    raw = re.sub(r"```json|```", "", raw).strip()
+    return json.loads(raw)
 
 
 def score_cv(cv_text: str) -> dict:
-    """Returns {"score": int, "summary": str}"""
-    prompt = f"""You are an expert HR recruiter and career coach. Analyze this CV and return ONLY valid JSON (no markdown, no extra text) in this exact format:
-{{
-  "score": <integer 0-100>,
-  "summary": "<2-3 sentence overall assessment>"
-}}
-
+    prompt = f"""You are an expert HR recruiter. Analyze this CV and return ONLY valid JSON, no markdown:
+{{"score": <integer 0-100>, "summary": "<2-3 sentence assessment>"}}
 CV:
 {cv_text[:4000]}"""
-    
-    raw = _ask_claude(prompt, max_tokens=300)
-    # Strip any accidental markdown fences
-    raw = re.sub(r"```json|```", "", raw).strip()
-    return json.loads(raw)
+    return _parse(_ask(prompt, 300))
 
 
 def section_feedback(cv_text: str) -> dict:
-    """Returns feedback for Summary, Experience, Skills, Education."""
-    prompt = f"""You are an expert CV reviewer. Analyze this CV and return ONLY valid JSON (no markdown) in this exact format:
-{{
-  "Summary": "<feedback on the professional summary/objective section>",
-  "Experience": "<feedback on work experience section>",
-  "Skills": "<feedback on skills section>",
-  "Education": "<feedback on education section>"
-}}
-
+    prompt = f"""Analyze this CV and return ONLY valid JSON, no markdown:
+{{"Summary": "<feedback>", "Experience": "<feedback>", "Skills": "<feedback>", "Education": "<feedback>"}}
 If a section is missing, say "Section not found — consider adding this."
-
 CV:
 {cv_text[:4000]}"""
-
-    raw = _ask_claude(prompt, max_tokens=800)
-    raw = re.sub(r"```json|```", "", raw).strip()
-    return json.loads(raw)
+    return _parse(_ask(prompt, 800))
 
 
 def ats_keywords(cv_text: str, job_title: str) -> list[str]:
-    """Returns list of 10 ATS keyword suggestions."""
-    prompt = f"""You are an ATS optimization expert. For a "{job_title}" role, list exactly 10 keywords/phrases that are commonly scanned by ATS systems and are MISSING or underrepresented in this CV.
-
-Return ONLY a JSON array of strings, no other text. Example: ["keyword1", "keyword2"]
-
+    prompt = f"""For a "{job_title}" role, list exactly 10 ATS keywords MISSING from this CV.
+Return ONLY a JSON array: ["keyword1", "keyword2", ...]
 CV:
 {cv_text[:3000]}"""
-
-    raw = _ask_claude(prompt, max_tokens=300)
-    raw = re.sub(r"```json|```", "", raw).strip()
-    return json.loads(raw)
+    return _parse(_ask(prompt, 300))
 
 
 def rewrite_bullets(cv_text: str) -> list[dict]:
-    """Returns top 3 bullet rewrites as [{"original": ..., "rewritten": ...}]"""
-    prompt = f"""You are a professional CV writer. Find the 3 weakest bullet points in this CV and rewrite them to be stronger (using action verbs, quantified results, and impact).
-
-Return ONLY valid JSON array (no markdown) in this exact format:
-[
-  {{"original": "<original bullet>", "rewritten": "<improved bullet>"}},
-  {{"original": "<original bullet>", "rewritten": "<improved bullet>"}},
-  {{"original": "<original bullet>", "rewritten": "<improved bullet>"}}
-]
-
+    prompt = f"""Find the 3 weakest bullet points in this CV and rewrite them with action verbs and quantified results.
+Return ONLY valid JSON array, no markdown:
+[{{"original": "...", "rewritten": "..."}}, ...]
 CV:
 {cv_text[:4000]}"""
-
-    raw = _ask_claude(prompt, max_tokens=600)
-    raw = re.sub(r"```json|```", "", raw).strip()
-    return json.loads(raw)
+    return _parse(_ask(prompt, 600))
