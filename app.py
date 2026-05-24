@@ -37,10 +37,10 @@ uploaded_file = st.file_uploader(
 )
 
 if uploaded_file and st.button("🔍 Analyse My CV", type="primary"):
-    
+
     if not os.getenv("GROQ_API_KEY"):
-    st.error("GROQ_API_KEY not found. Add it to your .env file.")
-    st.stop()
+        st.error("GROQ_API_KEY not found. Add it to your .env file.")
+        st.stop()
 
     # ── Extract text ──────────────────────────────────────────
     with st.spinner("Reading your CV..."):
