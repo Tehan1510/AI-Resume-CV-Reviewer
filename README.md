@@ -3,6 +3,8 @@
 An AI-powered CV/Resume reviewer built with Streamlit and Groq (free AI API).  
 Upload your CV and get an instant score, feedback, ATS keywords, and improved bullet points.
 
+Live demo: https://ai-resume-cv-reviewer-mi8dgyjqhkjcz4w8ufn95b.streamlit.app/
+
 ## Features
 - Upload PDF or DOCX
 - AI score (0–100) with grade badge
